@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import krzysztof.springpaging.user.domain.User;
 import krzysztof.springpaging.user.domain.UserMapper;
 import krzysztof.springpaging.user.domain.UserRepository;
+import krzysztof.springpaging.user.domain.UserSpecifications;
 
 @RestController
 @RequestMapping("users")
@@ -31,10 +32,14 @@ public class UserRestController {
 	@GetMapping
 	public List<UserDto> listing(
 			@RequestParam("page") Optional<Integer> optPage,
-			@RequestParam("size") Optional<Integer> optSize) {
+			@RequestParam("size") Optional<Integer> optSize,
+			@RequestParam("companyName") Optional<String> optCompanyName) {
 
 		Iterable<User> users;
-		if (optPage.isPresent() && optSize.isPresent()) {
+		if (optCompanyName.isPresent()) {
+			users = userRepository.findAll(UserSpecifications
+					.userOfCompanyNameLike(optCompanyName.get()));
+		} else if (optPage.isPresent() && optSize.isPresent()) {
 			Pageable pageable = PageRequest.of(optPage.get(), optSize.get(),
 					Sort.by("id"));
 			users = userRepository.findAll(pageable);
